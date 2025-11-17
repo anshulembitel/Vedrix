@@ -1,0 +1,11 @@
+{
+  "Home": {
+    "title": "Vedrix Chat",
+    "subtitle": "A highly customizable app",
+    "toggle": "Toggle theme",
+    "composerPlaceholder": "Generate a name...",
+    "voiceStart": "Start voice input",
+    "voiceStop": "Stop voice input",
+    "sendMessage": "Send message"
+  }
+}
