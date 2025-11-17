@@ -1,0 +1,22 @@
+{
+  "name": "vedrix",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace web",
+    "build": "npm run build --workspace web",
+    "start": "npm run start --workspace web",
+    "storybook": "npm run storybook --workspace web",
+    "storybook:build": "npm run build-storybook --workspace web",
+    "lint:biome": "biome check .",
+    "fix:biome": "biome check . --write",
+    "verdaccio": "verdaccio --config verdaccio.yaml"
+  },
+  "devDependencies": {
+    "verdaccio": "^6.2.1"
+  }
+}
