@@ -1,0 +1,11 @@
+{
+  "Home": {
+    "title": "Vedrix Chat",
+    "subtitle": "Eine hochgradig anpassbare App",
+    "toggle": "Design wechseln",
+    "composerPlaceholder": "Einen Namen generieren...",
+    "voiceStart": "Sprachaufnahme starten",
+    "voiceStop": "Sprachaufnahme stoppen",
+    "sendMessage": "Nachricht senden"
+  }
+}

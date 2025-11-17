@@ -1,0 +1,11 @@
+{
+  "Home": {
+    "title": "Vedrix चैट",
+    "subtitle": "एक अत्यधिक अनुकूलन योग्य ऐप",
+    "toggle": "थीम बदलें",
+    "composerPlaceholder": "एक नाम उत्पन्न करें...",
+    "voiceStart": "वॉयस इनपुट शुरू करें",
+    "voiceStop": "वॉयस इनपुट रोकें",
+    "sendMessage": "संदेश भेजें"
+  }
+}
