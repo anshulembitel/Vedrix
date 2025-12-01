@@ -36,6 +36,8 @@ const chipPrompts: Record<(typeof suggestionChips)[number], string> = {
     "Tell me how Apparatus Solutions does Business Process Automation (BPA) and share some example use cases.",
 };
 
+const STORAGE_KEY = "vedrix_chat_messages";
+
 const getTimeString = () =>
   new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
@@ -57,10 +59,29 @@ export default function HomePage() {
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored) as Message[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        setMessages(parsed);
+      }
+    } catch {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
+
+  useEffect(() => {
     const el = messagesContainerRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
-  }, [messages]);
+  }, [messages, isLoading]);
 
   const handleSend = async (msg: string) => {
     const text = msg.trim();
@@ -175,10 +196,10 @@ export default function HomePage() {
           ))}
         </section>
 
-       <section
-  ref={messagesContainerRef}
-  className="flex-1 flex flex-col gap-3 mt-2 overflow-y-auto pr-1 pb-28"
->
+        <section
+          ref={messagesContainerRef}
+          className="flex-1 flex flex-col gap-3 mt-2 overflow-y-auto pr-1 pb-28"
+        >
           {messages.map((m) => (
             <div
               key={m.id}
