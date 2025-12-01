@@ -7,12 +7,15 @@ export type ChipProps = {
   label: string;
   active?: boolean;
   onClick?: () => void;
+  disabled?: boolean;
 };
 
-export const Chip = ({ label, active, onClick }: ChipProps) => {
+export const Chip = ({ label, active, onClick, disabled }: ChipProps) => {
   return (
     <button
-      onClick={onClick}
+      type="button"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
       className={clsx(
         "text-sm font-medium whitespace-nowrap transition-all",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
@@ -20,7 +23,8 @@ export const Chip = ({ label, active, onClick }: ChipProps) => {
         glassPill,
         active
           ? "text-white bg-gradient-to-br from-[#6E4BFF] via-[#7C3AED] to-[#A855F7] border-transparent shadow-[0_6px_16px_rgba(110,75,255,0.45)] dark:text-white"
-          : "border border-slate-200/80 bg-white/60 text-slate-700 hover:bg-white/80 dark:border-slate-700/80 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:bg-slate-900/70"
+          : "border border-slate-200/80 bg-white/60 text-slate-700 hover:bg-white/80 dark:border-slate-700/80 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:bg-slate-900/70",
+        disabled && "opacity-60 cursor-not-allowed"
       )}
     >
       {label}

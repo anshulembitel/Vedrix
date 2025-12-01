@@ -6,36 +6,53 @@ import { ModeToggle } from "../../../components/mode-toggle";
 import { Chip } from "../../components/ui/chip";
 import { ChatBubble } from "../../components/ui/chat-bubble";
 import { ChatComposer } from "../../components/ui/chat-composer";
-import { Button } from "../../components/ui/button";
 import Image from "next/image";
+
 type Message = {
   id: number;
   from: "bot" | "user";
   text: string;
+  time?: string;
 };
 
 const suggestionChips = [
-  "Business names",
-  "Game names",
-  "Dish names",
-  "App names",
-];
+  "Our services",
+  "Digital marketing packages",
+  "SEO packages",
+  "Local SEO",
+  "Business process automation",
+] as const;
+
+const chipPrompts: Record<(typeof suggestionChips)[number], string> = {
+  "Our services":
+    "Give me a clear overview of all the services Apparatus Solutions offers.",
+  "Digital marketing packages":
+    "Explain the digital marketing packages offered by Apparatus Solutions, including Starter, Booster and Premium with pricing and guarantees.",
+  "SEO packages":
+    "Describe the different SEO packages from Apparatus Solutions like Startup, Growth, Premium and High Volume, with what is included.",
+  "Local SEO":
+    "Explain Apparatus Solutions' Local SEO services and packages, including who they are best suited for.",
+  "Business process automation":
+    "Tell me how Apparatus Solutions does Business Process Automation (BPA) and share some example use cases.",
+};
+
+const getTimeString = () =>
+  new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
 export default function HomePage() {
   const t = useTranslations("Home");
-  const [activeChip, setActiveChip] = useState<string>("Business names");
+  const [activeChip, setActiveChip] = useState<string>("Our services");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       from: "bot",
-      text: "Hey! I can help you generate unique and catchy names. Choose a category or start typing your idea.",
-    },
-    {
-      id: 2,
-      from: "user",
-      text: "Give me some modern business name ideas.",
+      text:
+        "Hi, I’m Vedrix AI, your assistant for Apparatus Solutions. " +
+        "You can type your question, or tap a chip below like “Our services” or “SEO packages” to get a quick overview.",
+      time: getTimeString(),
     },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -45,57 +62,98 @@ export default function HomePage() {
     el.scrollTop = el.scrollHeight;
   }, [messages]);
 
-  const handleSend = (msg: string) => {
+  const handleSend = async (msg: string) => {
     const text = msg.trim();
     if (!text) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), from: "user", text },
-      {
+    const userMessage: Message = {
+      id: Date.now(),
+      from: "user",
+      text,
+      time: getTimeString(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          history: [...messages, userMessage],
+        }),
+      });
+
+      const data = await res.json();
+
+      const botMessage: Message = {
         id: Date.now() + 1,
         from: "bot",
         text:
-          "Here are a few ideas:\n• NovaSpark\n• BrandNest\n• PixelFoundry\n• Vedrix Labs\n\nYou can refine it further or change the category.",
-      },
-    ]);
+          data?.reply ??
+          "Sorry, I couldn't answer that from the knowledge base.",
+        time: getTimeString(),
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (e) {
+      console.error(e);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 2,
+          from: "bot",
+          text: "Something went wrong talking to the AI. Please try again.",
+          time: getTimeString(),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChipClick = (label: (typeof suggestionChips)[number]) => {
+    if (isLoading) return;
+    setActiveChip(label);
+
+    const prompt = chipPrompts[label];
+    if (prompt) {
+      handleSend(prompt);
+    }
   };
 
   return (
     <main
       className="
-        h-screen flex justify-center
+        min-h-screen flex items-center justify-center
         bg-background text-foreground
         transition-colors duration-500
         overflow-hidden
       "
     >
-     <div
-       className="
-         relative w-full max-w-md h-full px-4 pt-6 pb-4 flex flex-col
-         bg-background text-foreground
-         transition-colors duration-500
-       "
-     >
+      <div
+        className="
+          relative w-full max-w-md h-[min(720px,100vh-2rem)] px-4 pt-6 pb-4 flex flex-col
+          bg-background text-foreground
+          transition-colors duration-500
+          rounded-3xl shadow-xl border border-slate-200/60 dark:border-slate-800/60
+          overflow-hidden
+        "
+      >
         <header className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
-       <div
-      className="
-        relative h-20 w-20 md:h-11 md:w-11
-       
-        
-      "
-    >
-      <Image
-        src="/V.png"           
-        alt="Vedrix logo"
-        fill                   
-        className="object-contain p-1"
-        sizes="(max-width: 768px) 40px, 44px"
-      />
-    </div>
+            <div className="relative h-20 w-20 md:h-11 md:w-11">
+              <Image
+                src="/V.png"
+                alt="Vedrix logo"
+                fill
+                className="object-contain p-1"
+                sizes="(max-width: 768px) 40px, 44px"
+              />
+            </div>
             <div className="flex flex-col">
-             
               <h1 className="text-3xl font-semibold tracking-tight flex items-center gap-2 text-slate-500">
                 {t("title")}
                 <i className="fa-solid fa-wand-magic-sparkles text-xs text-[#A855F7]" />
@@ -105,38 +163,22 @@ export default function HomePage() {
           <ModeToggle />
         </header>
 
-        <section className="rounded-3xl bg-gradient-to-br from-[#6E4BFF] via-[#7C3AED] to-[#A855F7] p-4 text-white shadow-[0_20px_60px_rgba(110,75,255,0.6)] border border-white/20">
-          <p className="text-sm font-medium mb-2 flex items-center gap-2">
-            <i className="fa-solid fa-sparkles text-sm" />
-            Instantly generate unique names with Vedrix AI
-          </p>
-          <p className="text-xs text-white/85 mb-4">
-            Ask in any language and get creative ideas tailored for your
-            business, app, product or game.
-          </p>
-          <Button variant="secondary" size="sm" fullWidth={false}>
-            <span className="flex items-center gap-2 text-xs">
-              <i className="fa-solid fa-wand-magic-sparkles text-[10px]" />
-              Try a sample prompt
-            </span>
-          </Button>
-        </section>
-
         <section className="flex gap-2 overflow-x-auto pb-1 mt-3 no-scrollbar">
           {suggestionChips.map((label) => (
             <Chip
               key={label}
               label={label}
               active={activeChip === label}
-              onClick={() => setActiveChip(label)}
+              disabled={isLoading}
+              onClick={() => handleChipClick(label)}
             />
           ))}
         </section>
 
-        <section
-          ref={messagesContainerRef}
-          className="flex-1 flex flex-col gap-3 mt-2 overflow-y-auto pr-1 pb-24"
-        >
+       <section
+  ref={messagesContainerRef}
+  className="flex-1 flex flex-col gap-3 mt-2 overflow-y-auto pr-1 pb-28"
+>
           {messages.map((m) => (
             <div
               key={m.id}
@@ -144,13 +186,19 @@ export default function HomePage() {
                 m.from === "user" ? "flex justify-end" : "flex justify-start"
               }
             >
-              <ChatBubble from={m.from} text={m.text} />
+              <ChatBubble from={m.from} text={m.text} time={m.time} />
             </div>
           ))}
+
+          {isLoading && (
+            <div className="flex justify-start">
+              <ChatBubble from="bot" isTyping />
+            </div>
+          )}
         </section>
 
-        <div className="mt-3 shrink-0">
-          <ChatComposer onSend={handleSend} />
+        <div className="absolute inset-x-4 bottom-12">
+          <ChatComposer onSend={handleSend} isLoading={isLoading} />
         </div>
       </div>
     </main>

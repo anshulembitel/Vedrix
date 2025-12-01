@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
-import { glassRounded } from "./glass";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMicrophone,
@@ -15,17 +14,21 @@ type ChatComposerProps = {
   onSend: (msg: string) => void;
   onVoiceToggle?: (isRecording: boolean) => void;
   voiceEnabled?: boolean;
+  isLoading?: boolean;
 };
 
 export const ChatComposer = ({
   onSend,
   onVoiceToggle,
   voiceEnabled = true,
+  isLoading = false,
 }: ChatComposerProps) => {
   const t = useTranslations("Home");
   const [msg, setMsg] = useState("");
-const [isRecording,setIsRecording]=useState(false)
+  const [isRecording, setIsRecording] = useState(false);
+
   const handleSend = () => {
+    if (isLoading) return;
     const trimmed = msg.trim();
     if (!trimmed) return;
     onSend(trimmed);
@@ -33,36 +36,43 @@ const [isRecording,setIsRecording]=useState(false)
   };
 
   const handleVoiceClick = () => {
-    if (!voiceEnabled) return;
+    if (!voiceEnabled || isLoading) return;
     const next = !isRecording;
     setIsRecording(next);
     onVoiceToggle?.(next);
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-4 flex justify-center px-4 pointer-events-none">
-      <div className="w-full max-w-md flex items-center gap-3 pointer-events-auto">
+    <div className="w-full flex justify-center">
+      <div className="w-full max-w-md flex items-center gap-3">
         <div
           className={clsx(
-            glassRounded,
-            "flex-1 flex items-center gap-3 h-12 md:h-14",
-            
-            "bg-slate-300/90 dark:bg-blue-950/80",
-            
-            "border border-slate-300/80 dark:border-blue-800/80"
+            "flex-1 flex items-center gap-3 h-12 md:h-14 px-3",
+            "rounded-full shadow-[0_8px_24px_rgba(15,23,42,0.12)] backdrop-blur-sm",
+            "bg-slate-200 border border-slate-300",
+            "dark:bg-slate-900/90 dark:border-slate-700",
+            isLoading && "opacity-80"
           )}
         >
           <input
-            placeholder={t("composerPlaceholder", { default: "Generate a name..." })}
-            className="flex-1 bg-transparent outline-none text-sm md:text-base text-slate-800 dark:text-slate-50 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            placeholder={t("composerPlaceholder", {
+              default: "Ask about Apparatus Solutions...",
+            })}
+            className={clsx(
+              "flex-1 bg-transparent outline-none text-sm md:text-base",
+              "text-slate-900 dark:text-slate-50",
+              "placeholder:text-slate-500 dark:placeholder:text-slate-400",
+              isLoading && "cursor-not-allowed"
+            )}
             value={msg}
             onChange={(e) => setMsg(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                handleSend();
+                if (!isLoading) handleSend();
               }
             }}
+            disabled={isLoading}
           />
 
           {voiceEnabled && (
@@ -76,10 +86,13 @@ const [isRecording,setIsRecording]=useState(false)
               }
               className={clsx(
                 "flex items-center justify-center rounded-full w-9 h-9 md:w-10 md:h-10",
-                "bg-white/40 dark:bg-slate-900/60 border border-white/40 dark:border-slate-700/70",
+                "bg-white/70 border border-white/60",
+                "dark:bg-slate-800 dark:border-slate-700",
                 "shadow-[0_4px_16px_rgba(0,0,0,0.15)]",
-                "active:scale-95 transition-all"
+                "active:scale-95 transition-all",
+                isLoading && "opacity-50 cursor-not-allowed"
               )}
+              disabled={isLoading}
             >
               <FontAwesomeIcon
                 icon={isRecording ? faMicrophoneSlash : faMicrophone}
@@ -93,11 +106,10 @@ const [isRecording,setIsRecording]=useState(false)
             </button>
           )}
         </div>
-
         <button
           type="button"
           onClick={handleSend}
-          disabled={!msg.trim()}
+          disabled={!msg.trim() || isLoading}
           aria-label={t("sendMessage", { default: "Send message" })}
           className={clsx(
             "rounded-full flex items-center justify-center active:scale-95 transition-all",
@@ -106,7 +118,14 @@ const [isRecording,setIsRecording]=useState(false)
             "disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed"
           )}
         >
-          <FontAwesomeIcon icon={faPaperPlane} className="text-sm md:text-base" />
+          {isLoading ? (
+            <span className="w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <FontAwesomeIcon
+              icon={faPaperPlane}
+              className="text-sm md:text-base"
+            />
+          )}
         </button>
       </div>
     </div>

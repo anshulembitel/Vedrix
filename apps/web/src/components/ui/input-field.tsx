@@ -17,7 +17,7 @@ export const InputField = ({
     <div
       className={clsx(
         "flex items-center gap-3",
-        "w-full max-w-md mx-auto h-14", // responsive width and centered
+        "w-full max-w-md mx-auto h-14", 
         "bg-white/80 dark:bg-slate-900/40",
         "border border-slate-200 dark:border-slate-700",
         "rounded-2xl px-4",

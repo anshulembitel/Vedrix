@@ -25,18 +25,11 @@ const base =
   "inline-flex items-center justify-center rounded-full font-semibold tracking-tight active:scale-[0.97] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6E4BFF] disabled:opacity-60 disabled:cursor-not-allowed";
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    // solid purple pill with soft shadow
-    "bg-[#6E4BFF] text-white shadow-[0_10px_30px_rgba(110,75,255,0.45)]",
+  primary: "bg-[#6E4BFF] text-white shadow-[0_10px_30px_rgba(110,75,255,0.45)]",
   secondary:
-    // glass morphism + purple text
     "backdrop-blur-xl bg-white/40 text-[#6E4BFF] border border-[#6E4BFF]/40 shadow-[0_8px_24px_rgba(0,0,0,0.06)]",
-  ghost:
-    // subtle text-only / toolbar button
-    "bg-transparent text-[#6E4BFF] shadow-none border border-transparent",
-  icon:
-    // round icon-only button
-    "bg-[#6E4BFF] text-white shadow-[0_10px_30px_rgba(110,75,255,0.45)] aspect-square p-0",
+  ghost: "bg-transparent text-[#6E4BFF] shadow-none border border-transparent",
+  icon: "bg-[#6E4BFF] text-white shadow-[0_10px_30px_rgba(110,75,255,0.45)] aspect-square p-0",
 };
 
 export const Button: React.FC<ButtonProps> = ({
@@ -66,7 +59,7 @@ export const Button: React.FC<ButtonProps> = ({
         sizeClasses[size],
         variantClasses[variant],
         fullWidth && "w-full",
-        variant === "icon" && "rounded-full h-12 w-12", // stronger circle for icon
+        variant === "icon" && "rounded-full h-12 w-12",
         className
       )}
       disabled={loading || props.disabled}

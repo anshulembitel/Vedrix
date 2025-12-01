@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { locales } from "../../i18n/config";
+import { ChatWidget } from "@vedrix@vedrix/components/BotComponents/ChatWidget";
 
 type Props = {
   children: ReactNode;
@@ -28,7 +29,8 @@ export default async function LocaleLayout(props: Props) {
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
+  
+      <ChatWidget/>
     </NextIntlClientProvider>
   );
 }
