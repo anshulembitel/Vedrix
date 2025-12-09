@@ -9,7 +9,7 @@ export type RagChunk = {
 
 let cachedChunks: RagChunk[] | null = null;
 
-async function loadChunks(): Promise<RagChunk[]> {
+export async function loadChunks(): Promise<RagChunk[]> {
   if (cachedChunks) return cachedChunks;
 
   const filePath = path.join(
@@ -33,7 +33,6 @@ async function loadChunks(): Promise<RagChunk[]> {
   const chunks: RagChunk[] = [];
   let i = 0;
   let chunkIndex = 0;
-
   while (i < words.length) {
     const slice = words.slice(i, i + CHUNK_SIZE);
     const chunkText = slice.join(" ").trim();
@@ -47,7 +46,6 @@ async function loadChunks(): Promise<RagChunk[]> {
     i += CHUNK_SIZE - CHUNK_OVERLAP;
     chunkIndex++;
   }
-
   cachedChunks = chunks;
   return chunks;
 }

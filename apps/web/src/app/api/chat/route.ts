@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { retrieveTopK } from "../../lib/rag";
+import { loadChunks } from "../../lib/rag";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL = "mistralai/mistral-small-3.2-24b-instruct";
+//const MODEL = "mistralai/mistral-small-3.2-24b-instruct";
+const MODEL = "amazon/nova-2-lite-v1:free";
+//const MODEL = "google/gemini-2.0-flash-exp";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +25,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const topDocs = await retrieveTopK(message, 6);
+    //const topDocs = await retrieveTopK(message, 6);
+    const topDocs = await loadChunks();
 
     if (!topDocs.length) {
       return NextResponse.json({
@@ -33,16 +36,20 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const MAX_CONTEXT_CHARS = 8000;
+    const MAX_CONTEXT_CHARS = 800000;
     let contextText = "";
 
     for (const d of topDocs) {
       const block = `Title: ${d.title}\nContent:\n${d.text}\n\n---\n\n`;
+      console.log(contextText.length + block.length);
       if (contextText.length + block.length > MAX_CONTEXT_CHARS) break;
       contextText += block;
     }
-
     const messages = [
+      {
+        role: "user",
+        content: message,
+      },
       {
   role: "system",
   content:
@@ -51,7 +58,8 @@ export async function POST(req: NextRequest) {
     "When answering, you must ALWAYS respond in clean plain text only. " +
     "Do NOT use Markdown, bold, headings, symbols, bullet points, asterisks, or formatting of any kind. " +
     "Write in short, clear, natural sentences. " +
-    "If the context does not contain the answer, say that the information is not available.",
+    "If the context does not contain the answer, say that the information is not available."+ 
+    "Respond in the source language of the message.",
 },
       {
         role: "system",
@@ -63,10 +71,6 @@ export async function POST(req: NextRequest) {
             content: m.text,
           }))
         : []),
-      {
-        role: "user",
-        content: message,
-      },
     ];
 
     const resp = await fetch(OPENROUTER_API_URL, {
